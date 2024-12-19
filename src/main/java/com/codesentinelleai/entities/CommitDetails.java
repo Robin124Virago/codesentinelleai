@@ -24,7 +24,6 @@ public class CommitDetails {
     @ElementCollection
     private List<String> removedFiles;
 
-    // Getters și Setters
     public Long getId() {
         return id;
     }

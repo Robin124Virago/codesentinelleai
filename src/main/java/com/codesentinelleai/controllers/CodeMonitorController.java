@@ -19,7 +19,6 @@ public class CodeMonitorController {
 
     private final CommitDetailsRepository repository;
 
-    // Constructor injection
     public CodeMonitorController(CommitDetailsRepository repository) {
         this.repository = repository;
     }
@@ -28,7 +27,6 @@ public class CodeMonitorController {
     public ResponseEntity<String> receiveWebhook(@RequestBody Map<String, Object> payload) {
         log.info("Payload received: {}", payload);
 
-        // Procesare și salvare
         final List<Map<String, Object>> commits = (List<Map<String, Object>>) payload.get("commits");
         if (commits == null || commits.isEmpty()) {
             log.warn("No commits found in payload.");
@@ -40,7 +38,6 @@ public class CodeMonitorController {
                 final CommitDetails details = processCommit(payload, commit);
                 repository.save(details);
 
-                // Analiza statică a fișierelor modificate
                 final List<String> modifiedFiles = details.getModifiedFiles();
                 if (modifiedFiles != null && !modifiedFiles.isEmpty()) {
                     analyzeModifiedFiles(modifiedFiles);
@@ -79,7 +76,6 @@ public class CodeMonitorController {
             log.info("Running static analysis on file: {}", file);
             runCheckstyleAnalysis(file);
 
-            // Scan for critical changes
             scanForCriticalChanges(modifiedFiles);
         }
     }
@@ -137,7 +133,6 @@ public class CodeMonitorController {
                         for (String keyword : sensitiveKeywords) {
                             if (line.contains(keyword)) {
                                 log.warn("Critical keyword '{}' found in file '{}' at line {}!", keyword, file, lineNumber);
-                                // Add additional alerting mechanisms here (e.g., send email, webhook).
                             }
                         }
                     }
