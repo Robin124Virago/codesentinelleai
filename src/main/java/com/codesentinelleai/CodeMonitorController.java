@@ -75,11 +75,15 @@ public class CodeMonitorController {
     }
 
     private void analyzeModifiedFiles(List<String> modifiedFiles) {
-        for (final String file : modifiedFiles) {
+        for (String file : modifiedFiles) {
             log.info("Running static analysis on file: {}", file);
             runCheckstyleAnalysis(file);
+
+            // Scan for critical changes
+            scanForCriticalChanges(modifiedFiles);
         }
     }
+
 
     private boolean runCheckstyleAnalysis(String filePath) {
         try {
@@ -112,4 +116,37 @@ public class CodeMonitorController {
             return false;
         }
     }
+
+    private void scanForCriticalChanges(List<String> modifiedFiles) {
+        final List<String> sensitiveKeywords = List.of("password", "API_KEY", "secret", "token");
+        for (String file : modifiedFiles) {
+            log.info("Scanning file for critical changes: {}", file);
+
+            try {
+                final File targetFile = new File(file);
+                if (!targetFile.exists()) {
+                    log.warn("File does not exist: {}", file);
+                    continue;
+                }
+
+                try (BufferedReader reader = new BufferedReader(new java.io.FileReader(targetFile))) {
+                    String line;
+                    int lineNumber = 0;
+                    while ((line = reader.readLine()) != null) {
+                        lineNumber++;
+                        for (String keyword : sensitiveKeywords) {
+                            if (line.contains(keyword)) {
+                                log.warn("Critical keyword '{}' found in file '{}' at line {}!", keyword, file, lineNumber);
+                                // Add additional alerting mechanisms here (e.g., send email, webhook).
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error scanning file for critical changes: {}", file, e);
+            }
+        }
+    }
+
+
 }
