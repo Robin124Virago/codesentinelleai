@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'checkstyle'
 }
 
 group = 'com'
@@ -26,15 +27,17 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// Dependencies for static analysis
-	testImplementation 'com.puppycrawl.tools:checkstyle:10.12.1'
-
 	// Dependencies for containerized testing
 	testImplementation 'org.testcontainers:testcontainers:1.19.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+checkstyle {
+	toolVersion = '10.12.1'
+	configFile = file('config/checkstyle/checkstyle.xml')
 }
 
 tasks.withType(Checkstyle).configureEach {
