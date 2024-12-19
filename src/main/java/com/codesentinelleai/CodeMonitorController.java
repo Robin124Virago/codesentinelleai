@@ -29,23 +29,23 @@ public class CodeMonitorController {
         log.info("Payload received: {}", payload);
 
         // Procesare și salvare
-        List<Map<String, Object>> commits = (List<Map<String, Object>>) payload.get("commits");
+        final List<Map<String, Object>> commits = (List<Map<String, Object>>) payload.get("commits");
         if (commits == null || commits.isEmpty()) {
             log.warn("No commits found in payload.");
             return ResponseEntity.ok("No commits found in payload.");
         }
 
-        for (Map<String, Object> commit : commits) {
+        for (final Map<String, Object> commit : commits) {
             try {
-                CommitDetails details = processCommit(payload, commit);
+                final CommitDetails details = processCommit(payload, commit);
                 repository.save(details);
 
                 // Analiza statică a fișierelor modificate
-                List<String> modifiedFiles = details.getModifiedFiles();
+                final List<String> modifiedFiles = details.getModifiedFiles();
                 if (modifiedFiles != null && !modifiedFiles.isEmpty()) {
                     analyzeModifiedFiles(modifiedFiles);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("Error processing commit: {}", commit, e);
             }
         }
@@ -55,14 +55,14 @@ public class CodeMonitorController {
 
     @GetMapping("/commits")
     public ResponseEntity<List<CommitDetails>> getAllCommits() {
-        List<CommitDetails> commits = repository.findAll();
+        final List<CommitDetails> commits = repository.findAll();
         return ResponseEntity.ok(commits);
     }
 
     private CommitDetails processCommit(Map<String, Object> payload, Map<String, Object> commit) {
-        CommitDetails details = new CommitDetails();
+        final CommitDetails details = new CommitDetails();
         details.setBranch((String) payload.get("ref"));
-        Map<String, Object> repositoryInfo = (Map<String, Object>) payload.get("repository");
+        final Map<String, Object> repositoryInfo = (Map<String, Object>) payload.get("repository");
         details.setRepoName((String) repositoryInfo.get("name"));
         details.setCommitId((String) commit.get("id"));
         details.setMessage((String) commit.get("message"));
@@ -75,7 +75,7 @@ public class CodeMonitorController {
     }
 
     private void analyzeModifiedFiles(List<String> modifiedFiles) {
-        for (String file : modifiedFiles) {
+        for (final String file : modifiedFiles) {
             log.info("Running static analysis on file: {}", file);
             runCheckstyleAnalysis(file);
         }
@@ -83,22 +83,22 @@ public class CodeMonitorController {
 
     private boolean runCheckstyleAnalysis(String filePath) {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder();
+            final ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.command("sh", "-c", "./gradlew check");
             processBuilder.directory(new File(System.getProperty("user.dir")));
             processBuilder.redirectErrorStream(true);
 
-            Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final Process process = processBuilder.start();
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-            StringBuilder output = new StringBuilder();
+            final StringBuilder output = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 log.info(line);
                 output.append(line).append("\n");
             }
 
-            int exitCode = process.waitFor();
+            final int exitCode = process.waitFor();
             if (exitCode == 0) {
                 log.info("Checkstyle analysis passed for file: {}", filePath);
                 return true;
@@ -107,10 +107,9 @@ public class CodeMonitorController {
                 log.warn("Checkstyle Output: \n{}", output);
                 return false;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error running Checkstyle analysis on file: {}", filePath, e);
             return false;
         }
     }
-
 }
