@@ -46,5 +46,13 @@ public class CodeMonitorController {
 
         return ResponseEntity.ok("Webhook processed and saved to database!");
     }
+
+    @GetMapping("/commits")
+    public ResponseEntity<List<CommitDetails>> getAllCommits() {
+        List<CommitDetails> commits = repository.findAll();
+        return ResponseEntity.ok(commits);
+    }
+
+
 }
 
