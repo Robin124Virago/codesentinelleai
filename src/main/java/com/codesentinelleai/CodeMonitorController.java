@@ -81,31 +81,36 @@ public class CodeMonitorController {
         }
     }
 
-    private void runCheckstyleAnalysis(String filePath) {
+    private boolean runCheckstyleAnalysis(String filePath) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.command("sh", "-c", "./gradlew check");
-
-            // Setează directorul de lucru la proiect
             processBuilder.directory(new File(System.getProperty("user.dir")));
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+            StringBuilder output = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 log.info(line);
+                output.append(line).append("\n");
             }
 
             int exitCode = process.waitFor();
             if (exitCode == 0) {
                 log.info("Checkstyle analysis passed for file: {}", filePath);
+                return true;
             } else {
                 log.warn("Checkstyle analysis failed for file: {}", filePath);
+                log.warn("Checkstyle Output: \n{}", output);
+                return false;
             }
         } catch (Exception e) {
             log.error("Error running Checkstyle analysis on file: {}", filePath, e);
+            return false;
         }
     }
+
 }
