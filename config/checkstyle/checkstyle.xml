@@ -8,5 +8,9 @@
     <module name="WhitespaceAround"/>
     <module name="FinalLocalVariable"/>
     <module name="EmptyBlock"/>
+    <module name="UnusedImports"/>
+    <module name="JavadocType"/>
+    <module name="ModifierOrder"></module>
   </module>
 </module>
+

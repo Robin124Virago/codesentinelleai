@@ -38,11 +38,11 @@ tasks.named('test') {
 }
 
 checkstyle {
-	toolVersion = '10.12.1'
+	toolVersion = "10.21.0"
 	configFile = file('config/checkstyle/checkstyle.xml')
 }
 
-tasks.withType(Checkstyle).configureEach {
+tasks.withType(Checkstyle) {
 	configFile = file("config/checkstyle/checkstyle.xml")
 	ignoreFailures = false
 }
